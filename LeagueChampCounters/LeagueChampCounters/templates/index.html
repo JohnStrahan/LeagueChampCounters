@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'content/site.css') }}">
+    <title>League Champion Counters</title>
+
+</head>
+
+<body>
+
+    <h1>League of Legends Champion Counters</h1>
+
+    <div id="dropdown-container">
+
+        <form>
+            <select id="dropdown" name="dropdown" onchange="getAdditionalData()">
+                <option value="" selected disabled>Select Champ To Counter</option>
+                {% for champion in data %}
+                <option value="{{ champion[0] }}">{{ champion[0] }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div id="additionalDataContainer"></div>
+
+    <script>
+        function getAdditionalData() {
+            var championName = document.getElementById("dropdown").value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/get_champion_data", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var additionalDataContainer = document.getElementById("additionalDataContainer");
+
+                    if (response.additional_data !== null) {
+                        additionalDataContainer.innerHTML = `<h2 class="additional-data">Is Countered By: ${response.additional_data}</h2>`;
+                    } else {
+                        additionalDataContainer.innerHTML = "<p class='no-data'>No additional data available.</p>";
+                    }
+                }
+            };
+            xhr.send("champion_name=" + encodeURIComponent(championName));
+        }
+    </script>
+
+
+</body>
+</html>
